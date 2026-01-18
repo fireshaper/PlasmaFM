@@ -1,0 +1,26 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "user@example.com",
+                "Name": "Roam Radio"
+            }
+        ],
+        "Category": "Multimedia",
+        "Description": "Random internet radio player inspired by RoamFM",
+        "EnabledByDefault": true,
+        "FormFactors": [
+            "desktop",
+            "tablet",
+            "handset"
+        ],
+        "Icon": "media-playback-start",
+        "Id": "org.kde.plasma.roamradio",
+        "License": "GPL-2.0+",
+        "Name": "Roam Radio",
+        "Version": "1.0",
+        "Website": "https://radio-browser.info"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-MainScript": "ui/main.qml"
+}
