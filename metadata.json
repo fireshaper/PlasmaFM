@@ -7,7 +7,7 @@
             }
         ],
         "Category": "Multimedia",
-        "Description": "Random internet radio player inspired by RoamFM",
+        "Description": "A radio player widget that lets you discover and play radio stations from around the world",
         "EnabledByDefault": true,
         "FormFactors": [
             "desktop",
@@ -15,9 +15,9 @@
             "handset"
         ],
         "Icon": "media-playback-start",
-        "Id": "org.kde.plasma.roamradio",
+        "Id": "org.kde.plasma.plasmafm",
         "License": "GPL-2.0+",
-        "Name": "Roam Radio",
+        "Name": "PlasmaFM",
         "Version": "1.0",
         "Website": "https://radio-browser.info"
     },

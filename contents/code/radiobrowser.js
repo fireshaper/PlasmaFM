@@ -51,7 +51,7 @@ function fetchRandomStations(minBitrate, excludedLanguages, count, callback) {
     };
 
     xhr.open("GET", url);
-    xhr.setRequestHeader("User-Agent", "RoamRadio/1.0");
+    xhr.setRequestHeader("User-Agent", "PlasmaFM/1.0");
     xhr.send();
 }
 
@@ -72,7 +72,7 @@ function clickStation(stationUuid) {
     const url = API_BASE + "/url/" + stationUuid;
 
     xhr.open("GET", url);
-    xhr.setRequestHeader("User-Agent", "RoamRadio/1.0");
+    xhr.setRequestHeader("User-Agent", "PlasmaFM/1.0");
     xhr.send();
 }
 
@@ -144,6 +144,6 @@ function searchStations(query, callback) {
     };
 
     xhr.open("GET", url);
-    xhr.setRequestHeader("User-Agent", "RoamRadio/1.0");
+    xhr.setRequestHeader("User-Agent", "PlasmaFM/1.0");
     xhr.send();
 }

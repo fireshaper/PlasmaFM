@@ -56,7 +56,7 @@ PlasmoidItem {
             spacing: Kirigami.Units.smallSpacing
 
             PlasmaComponents.Label {
-                text: "Roam FM"
+                text: "PlasmaFM"
                 font.pixelSize: Kirigami.Units.gridUnit * 1.2
                 font.weight: Font.Bold
                 color: Kirigami.Theme.textColor
