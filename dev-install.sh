@@ -3,10 +3,10 @@
 # Roam Radio - Development Installation Script
 # Reinstalls the plasmoid for testing (removes old version first)
 
-WIDGET_NAME="org.kde.plasma.roamradio"
+WIDGET_NAME="org.kde.plasma.plasmafm"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Development install: Reinstalling Roam Radio plasmoid..."
+echo "Development install: Reinstalling PlasmaFM plasmoid..."
 
 # Detect which package tool is available
 if command -v kpackagetool6 &> /dev/null; then
@@ -38,7 +38,7 @@ echo "Installing widget from $SCRIPT_DIR..."
 $PKGTOOL --type Plasma/Applet --install "$SCRIPT_DIR"
 
 if [ $? -eq 0 ]; then
-    echo "✓ Roam Radio reinstalled successfully!"
+    echo "✓ PlasmaFM reinstalled successfully!"
     echo ""
     echo "Restarting plasmashell to reload widget..."
     killall plasmashell

@@ -45,10 +45,18 @@ PlasmoidItem {
         Layout.minimumWidth: Kirigami.Units.gridUnit * 20
         Layout.minimumHeight: Kirigami.Units.gridUnit * 15
 
-        ColumnLayout {
+        Rectangle {
             anchors.fill: parent
-            anchors.margins: Kirigami.Units.largeSpacing
-            spacing: Kirigami.Units.largeSpacing
+            radius: Kirigami.Units.largeSpacing
+            color: Kirigami.Theme.backgroundColor
+            border.color: Kirigami.Theme.textColor
+            border.width: 1
+            opacity: 0.95
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: Kirigami.Units.largeSpacing
+                spacing: Kirigami.Units.largeSpacing
 
         // Header with controls
         RowLayout {
@@ -286,6 +294,8 @@ PlasmoidItem {
         }
         }
     }
+}
+
 
     // Config change handlers
     onMinBitrateChanged: {

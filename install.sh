@@ -3,10 +3,10 @@
 # Roam Radio - Installation Script
 # Installs the plasmoid to the local Plasma widgets directory
 
-WIDGET_NAME="org.kde.plasma.roamradio"
+WIDGET_NAME="org.kde.plasma.plasmafm"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Installing Roam Radio plasmoid..."
+echo "Installing PlasmaFM plasmoid..."
 
 # Detect which package tool is available
 if command -v kpackagetool6 &> /dev/null; then
