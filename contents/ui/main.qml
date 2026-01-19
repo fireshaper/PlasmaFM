@@ -119,29 +119,133 @@ PlasmoidItem {
             }
         }
 
-        // Placeholder for globe (simple colored circle for now)
+        // Globe visualization - 2D map behind circular mask
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignHCenter
 
-            Rectangle {
+            // Circular container
+            Item {
+                id: globeContainer
                 anchors.centerIn: parent
-                width: Math.min(parent.width, parent.height) * 0.6
+                width: Math.min(parent.width, parent.height) * 0.7
+                height: width
+
+                // Container for tiled maps
+                Item {
+                    id: mapContainer
+                    width: parent.width * 2.5 * 3  // 3 copies side by side
+                    height: parent.height * 2.5
+                    
+                    // Calculate base position for center tile
+                    property real baseX: {
+                        if (!root.currentStation || root.currentStation.geo_long === null) {
+                            return -(width / 3 - parent.width) / 2; // Default to center (0,0)
+                        }
+                        var lon = root.currentStation.geo_long;
+                        var normalizedLon = (lon + 180) / 360;
+                        var mapX = normalizedLon * (width / 3);
+                        return parent.width / 2 - mapX - (width / 3);
+                    }
+                    
+                    property real baseY: {
+                        if (!root.currentStation || root.currentStation.geo_lat === null) {
+                            return -(height - parent.height) / 2;
+                        }
+                        var lat = root.currentStation.geo_lat;
+                        var normalizedLat = (90 - lat) / 180;
+                        var mapY = normalizedLat * height;
+                        return parent.height / 2 - mapY;
+                    }
+                    
+                    x: baseX
+                    y: baseY
+                    
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 1500
+                            easing.type: Easing.InOutCubic
+                        }
+                    }
+                    
+                    Behavior on y {
+                        NumberAnimation {
+                            duration: 1500
+                            easing.type: Easing.InOutCubic
+                        }
+                    }
+                    
+                    // Left tile
+                    Image {
+                        x: 0
+                        width: parent.width / 3
+                        height: parent.height
+                        source: "../images/earth.jpg"
+                        fillMode: Image.Stretch
+                        smooth: true
+                    }
+                    
+                    // Center tile
+                    Image {
+                        x: parent.width / 3
+                        width: parent.width / 3
+                        height: parent.height
+                        source: "../images/earth.jpg"
+                        fillMode: Image.Stretch
+                        smooth: true
+                    }
+                    
+                    // Right tile
+                    Image {
+                        x: parent.width / 3 * 2
+                        width: parent.width / 3
+                        height: parent.height
+                        source: "../images/earth.jpg"
+                        fillMode: Image.Stretch
+                        smooth: true
+                    }
+                }
+
+                // Circular border
+                Rectangle {
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: "transparent"
+                    border.color: Kirigami.Theme.textColor
+                    border.width: 2
+                    opacity: 0.3
+                }
+
+                // Clip to circle using layer
+                layer.enabled: true
+                layer.effect: OpacityMask {
+                    maskSource: Rectangle {
+                        width: globeContainer.width
+                        height: globeContainer.height
+                        radius: width / 2
+                    }
+                }
+            }
+
+            // Station location marker (red dot in center)
+            Rectangle {
+                visible: root.currentStation && root.currentStation.geo_lat !== null && root.currentStation.geo_long !== null
+                anchors.centerIn: globeContainer
+                width: Kirigami.Units.gridUnit * 0.8
                 height: width
                 radius: width / 2
-                color: Kirigami.Theme.backgroundColor
-                border.color: Kirigami.Theme.textColor
+                color: "#FF5252"
+                border.color: "white"
                 border.width: 2
-                opacity: 0.3
-
-                Kirigami.Icon {
-                    anchors.centerIn: parent
-                    width: parent.width * 0.5
-                    height: width
-                    source: "globe"
-                    color: Kirigami.Theme.textColor
-                    opacity: 0.5
+                z: 10
+                
+                // Pulsing animation
+                SequentialAnimation on scale {
+                    running: root.isPlaying && root.currentStation !== null
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 1.3; duration: 800; easing.type: Easing.InOutQuad }
+                    NumberAnimation { to: 1.0; duration: 800; easing.type: Easing.InOutQuad }
                 }
             }
         }
@@ -166,7 +270,7 @@ PlasmoidItem {
                 }
 
                 PlasmaComponents.Label {
-                    text: root.currentStation ? root.currentStation.country : ""
+                    text: root.currentStation ? root.shortenCountryName(root.currentStation.country) : ""
                     font.pixelSize: Kirigami.Units.gridUnit * 0.9
                     color: Kirigami.Theme.textColor
                 }
@@ -312,6 +416,21 @@ PlasmoidItem {
         }
 
         playStation(station);
+    }
+
+    // Shorten long country names for display
+    function shortenCountryName(country) {
+        if (!country) return "";
+        
+        // Map of long names to short names
+        var nameMap = {
+            "The United Kingdom of Great Britain and Northern Ireland": "The United Kingdom",
+            "United Kingdom of Great Britain and Northern Ireland": "United Kingdom",
+            "The United States of America": "United States",
+            "United States of America": "United States"
+        };
+        
+        return nameMap[country] || country;
     }
 
     function playStation(station) {
