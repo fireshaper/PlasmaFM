@@ -6,7 +6,7 @@ const API_BASE = "https://de1.api.radio-browser.info/json";
 // Fetch random stations with filters
 function fetchRandomStations(minBitrate, excludedLanguages, count, callback) {
     const xhr = new XMLHttpRequest();
-    
+
     // Build query parameters
     let params = [];
     if (minBitrate > 0) {
@@ -15,31 +15,31 @@ function fetchRandomStations(minBitrate, excludedLanguages, count, callback) {
     params.push("limit=" + (count || 100));
     params.push("hidebroken=true");
     params.push("order=random");
-    
+
     const url = API_BASE + "/stations/search?" + params.join("&");
-    
-    xhr.onreadystatechange = function() {
+
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
                 try {
                     const stations = JSON.parse(xhr.responseText);
-                    
+
                     // Filter out excluded languages
                     let filtered = stations;
                     if (excludedLanguages && excludedLanguages.length > 0) {
-                        filtered = stations.filter(function(station) {
+                        filtered = stations.filter(function (station) {
                             const lang = (station.language || "").toLowerCase();
-                            return !excludedLanguages.some(function(excluded) {
+                            return !excludedLanguages.some(function (excluded) {
                                 return lang.includes(excluded.toLowerCase());
                             });
                         });
                     }
-                    
+
                     // Filter out stations without valid URLs
-                    filtered = filtered.filter(function(station) {
+                    filtered = filtered.filter(function (station) {
                         return station.url_resolved && station.url_resolved.length > 0;
                     });
-                    
+
                     callback(filtered, null);
                 } catch (e) {
                     callback(null, "Failed to parse response: " + e.message);
@@ -49,7 +49,7 @@ function fetchRandomStations(minBitrate, excludedLanguages, count, callback) {
             }
         }
     };
-    
+
     xhr.open("GET", url);
     xhr.setRequestHeader("User-Agent", "RoamRadio/1.0");
     xhr.send();
@@ -67,10 +67,10 @@ function getRandomStation(stations) {
 // Click station (increment click count on radio-browser)
 function clickStation(stationUuid) {
     if (!stationUuid) return;
-    
+
     const xhr = new XMLHttpRequest();
     const url = API_BASE + "/url/" + stationUuid;
-    
+
     xhr.open("GET", url);
     xhr.setRequestHeader("User-Agent", "RoamRadio/1.0");
     xhr.send();
@@ -84,10 +84,28 @@ function getStationInfo(station) {
             country: "",
             bitrate: "",
             codec: "",
-            url: ""
+            url: "",
+            uuid: "",
+            geo_lat: null,
+            geo_long: null
         };
     }
-    
+
+    // Radio Browser usually uses geo_lat / geo_long (strings sometimes)
+    let lat = station.geo_lat !== undefined && station.geo_lat !== null ? Number(station.geo_lat) : null;
+    let lon = station.geo_long !== undefined && station.geo_long !== null ? Number(station.geo_long) : null;
+
+    // If no coordinates, try to get country coordinates
+    // Note: countries.js will be imported in main.qml
+    if ((lat === null || lon === null || !Number.isFinite(lat) || !Number.isFinite(lon)) && station.country) {
+        // This will be handled in main.qml using the Countries module
+        lat = null;
+        lon = null;
+    } else {
+        lat = Number.isFinite(lat) ? lat : null;
+        lon = Number.isFinite(lon) ? lon : null;
+    }
+
     return {
         name: station.name || "Unknown Station",
         country: station.country || "",
@@ -97,7 +115,11 @@ function getStationInfo(station) {
         uuid: station.stationuuid || "",
         language: station.language || "",
         tags: station.tags || "",
-        favicon: station.favicon || ""
+        favicon: station.favicon || "",
+
+        // Coords for globe aiming + dot
+        geo_lat: lat,
+        geo_long: lon
     };
 }
 
@@ -105,8 +127,8 @@ function getStationInfo(station) {
 function searchStations(query, callback) {
     const xhr = new XMLHttpRequest();
     const url = API_BASE + "/stations/byname/" + encodeURIComponent(query);
-    
-    xhr.onreadystatechange = function() {
+
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
                 try {
@@ -120,7 +142,7 @@ function searchStations(query, callback) {
             }
         }
     };
-    
+
     xhr.open("GET", url);
     xhr.setRequestHeader("User-Agent", "RoamRadio/1.0");
     xhr.send();

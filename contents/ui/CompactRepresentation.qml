@@ -14,47 +14,13 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: Plasmoid.expanded = !Plasmoid.expanded
+        onClicked: plasmoid.expanded = !plasmoid.expanded
     }
 
-    ColumnLayout {
+    Kirigami.Icon {
         anchors.centerIn: parent
-        spacing: Kirigami.Units.smallSpacing
-
-        Kirigami.Icon {
-            id: icon
-            Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: Kirigami.Units.iconSizes.medium
-            Layout.preferredHeight: Kirigami.Units.iconSizes.medium
-            source: {
-                if (Plasmoid.rootItem.isLoading) return "media-playlist-shuffle";
-                if (Plasmoid.rootItem.isPlaying) return "media-playback-playing";
-                return "media-playback-start";
-            }
-            
-            // Pulse animation when loading
-            SequentialAnimation on opacity {
-                running: Plasmoid.rootItem.isLoading
-                loops: Animation.Infinite
-                NumberAnimation { to: 0.3; duration: 600 }
-                NumberAnimation { to: 1.0; duration: 600 }
-            }
-        }
-
-        PlasmaComponents.Label {
-            Layout.alignment: Qt.AlignHCenter
-            text: {
-                if (Plasmoid.rootItem.isLoading) return "...";
-                if (Plasmoid.rootItem.currentStation) {
-                    return Plasmoid.rootItem.currentStation.name.substring(0, 12) + 
-                           (Plasmoid.rootItem.currentStation.name.length > 12 ? "..." : "");
-                }
-                return "Roam";
-            }
-            font.pixelSize: Kirigami.Units.gridUnit * 0.6
-            elide: Text.ElideRight
-            horizontalAlignment: Text.AlignHCenter
-            visible: Plasmoid.rootItem.currentStation !== null || Plasmoid.rootItem.isLoading
-        }
+        width: Kirigami.Units.iconSizes.medium
+        height: Kirigami.Units.iconSizes.medium
+        source: "media-playback-start"
     }
 }
