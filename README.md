@@ -4,7 +4,7 @@ A KDE Plasma 6 widget that plays random internet radio stations from [radio-brow
 
 ## Features
 
-- 🎲 **One-Click Roam**: Instantly play a random radio station
+- 🎲 **One-Click Roaming**: Instantly play a random radio station
 - ⏯️ **Playback Controls**: Play, pause, and skip to the next random station
 - ⭐ **Favorites**: Save your favorite stations for quick access
 - 🌍 **Station Info**: View station name, country, bitrate, and codec
@@ -33,7 +33,7 @@ chmod +x install.sh
 
 1. Right-click on your desktop or panel
 2. Select **Add Widgets...**
-3. Search for **Roam Radio**
+3. Search for **PlasmaFM Radio**
 4. Drag it to your desktop or panel
 
 ## Development
@@ -107,7 +107,7 @@ killall plasmashell; kstart5 plasmashell
 
 ### Basic Controls
 
-- **Roam Button**: Play a random station from the radio-browser.info database
+- **Random Button**: Play a random station from the radio-browser.info database
 - **Play/Pause**: Control playback of the current station
 - **Star Button**: Add/remove the current station from favorites
 

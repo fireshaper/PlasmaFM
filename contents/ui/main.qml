@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls as QQC2
 import QtMultimedia
 import Qt5Compat.GraphicalEffects
 import org.kde.plasma.plasmoid
@@ -58,243 +59,264 @@ PlasmoidItem {
                 anchors.margins: Kirigami.Units.largeSpacing
                 spacing: Kirigami.Units.largeSpacing
 
-        // Header with controls
-        RowLayout {
-        Layout.fillWidth: true
-            spacing: Kirigami.Units.smallSpacing
+                // Header with controls
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Kirigami.Units.smallSpacing
 
-            PlasmaComponents.Label {
-                text: "PlasmaFM"
-                font.pixelSize: Kirigami.Units.gridUnit * 1.2
-                font.weight: Font.Bold
-                color: Kirigami.Theme.textColor
-            }
+                    PlasmaComponents.Label {
+                        text: "PlasmaFM"
+                        font.pixelSize: Kirigami.Units.gridUnit * 1.2
+                        font.weight: Font.Bold
+                        color: Kirigami.Theme.textColor
+                    }
 
-            Item { Layout.fillWidth: true }
+                    Item { Layout.fillWidth: true }
 
-            PlasmaComponents.ToolButton {
-                icon.name: "media-playback-start"
-                enabled: !root.isLoading
-                onClicked: root.togglePlayPause()
-            }
+                    PlasmaComponents.ToolButton {
+                        icon.name: "media-playback-start"
+                        enabled: !root.isLoading
+                        onClicked: root.togglePlayPause()
+                    }
 
-            PlasmaComponents.ToolButton {
-                icon.name: "media-skip-forward"
-                enabled: !root.isLoading
-                onClicked: root.roamToRandomStation()
-            }
+                    PlasmaComponents.ToolButton {
+                        icon.name: "media-skip-forward"
+                        enabled: !root.isLoading
+                        onClicked: root.roamToRandomStation()
+                    }
 
-            PlasmaComponents.ToolButton {
-                icon.name: "media-playback-stop"
-                enabled: root.isPlaying
-                onClicked: root.stop()
-            }
-        }
-
-        // Status and station name
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: Kirigami.Units.smallSpacing
-
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-                spacing: Kirigami.Units.smallSpacing
-
-                Rectangle {
-                    width: Kirigami.Units.gridUnit * 0.6
-                    height: width
-                    radius: width / 2
-                    color: root.isPlaying ? "#4CAF50" : "#9E9E9E"
+                    PlasmaComponents.ToolButton {
+                        icon.name: "media-playback-stop"
+                        enabled: root.isPlaying
+                        onClicked: root.stop()
+                    }
                 }
 
-                PlasmaComponents.Label {
-                    text: root.isPlaying ? "Now Playing" : (root.isLoading ? "Loading..." : "Not Playing")
-                    font.pixelSize: Kirigami.Units.gridUnit * 0.8
-                    color: Kirigami.Theme.textColor
-                    opacity: 0.7
+                // Status and station name
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Kirigami.Units.smallSpacing
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: Kirigami.Units.smallSpacing
+
+                        Rectangle {
+                            width: Kirigami.Units.gridUnit * 0.6
+                            height: width
+                            radius: width / 2
+                            color: root.isPlaying ? "#4CAF50" : "#9E9E9E"
+                        }
+
+                        PlasmaComponents.Label {
+                            text: root.isPlaying ? "Now Playing" : (root.isLoading ? "Loading..." : "Not Playing")
+                            font.pixelSize: Kirigami.Units.gridUnit * 0.8
+                            color: Kirigami.Theme.textColor
+                            opacity: 0.7
+                        }
+                    }
+
+                    PlasmaComponents.Label {
+                        Layout.fillWidth: true
+                        text: root.currentStation ? root.currentStation.name : "Click skip to start"
+                        font.pixelSize: Kirigami.Units.gridUnit * 1.1
+                        font.weight: Font.Bold
+                        color: Kirigami.Theme.textColor
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                        maximumLineCount: 1
+                    }
                 }
-            }
 
-            PlasmaComponents.Label {
-                Layout.fillWidth: true
-                text: root.currentStation ? root.currentStation.name : "Click skip to start"
-                font.pixelSize: Kirigami.Units.gridUnit * 1.1
-                font.weight: Font.Bold
-                color: Kirigami.Theme.textColor
-                horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideRight
-                maximumLineCount: 1
-            }
-        }
-
-        // Globe visualization - 2D map behind circular mask
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.alignment: Qt.AlignHCenter
-
-            // Circular container
-            Item {
-                id: globeContainer
-                anchors.centerIn: parent
-                width: Math.min(parent.width, parent.height) * 0.7
-                height: width
-
-                // Container for tiled maps
+                // Globe visualization - 2D map behind circular mask
                 Item {
-                    id: mapContainer
-                    width: parent.width * 2.5 * 3  // 3 copies side by side
-                    height: parent.height * 2.5
-                    
-                    // Calculate base position for center tile
-                    property real baseX: {
-                        if (!root.currentStation || root.currentStation.geo_long === null) {
-                            return -(width / 3 - parent.width) / 2; // Default to center (0,0)
-                        }
-                        var lon = root.currentStation.geo_long;
-                        var normalizedLon = (lon + 180) / 360;
-                        var mapX = normalizedLon * (width / 3);
-                        return parent.width / 2 - mapX - (width / 3);
-                    }
-                    
-                    property real baseY: {
-                        if (!root.currentStation || root.currentStation.geo_lat === null) {
-                            return -(height - parent.height) / 2;
-                        }
-                        var lat = root.currentStation.geo_lat;
-                        var normalizedLat = (90 - lat) / 180;
-                        var mapY = normalizedLat * height;
-                        return parent.height / 2 - mapY;
-                    }
-                    
-                    x: baseX
-                    y: baseY
-                    
-                    Behavior on x {
-                        NumberAnimation {
-                            duration: 1500
-                            easing.type: Easing.InOutCubic
-                        }
-                    }
-                    
-                    Behavior on y {
-                        NumberAnimation {
-                            duration: 1500
-                            easing.type: Easing.InOutCubic
-                        }
-                    }
-                    
-                    // Left tile
-                    Image {
-                        x: 0
-                        width: parent.width / 3
-                        height: parent.height
-                        source: "../images/earth.jpg"
-                        fillMode: Image.Stretch
-                        smooth: true
-                    }
-                    
-                    // Center tile
-                    Image {
-                        x: parent.width / 3
-                        width: parent.width / 3
-                        height: parent.height
-                        source: "../images/earth.jpg"
-                        fillMode: Image.Stretch
-                        smooth: true
-                    }
-                    
-                    // Right tile
-                    Image {
-                        x: parent.width / 3 * 2
-                        width: parent.width / 3
-                        height: parent.height
-                        source: "../images/earth.jpg"
-                        fillMode: Image.Stretch
-                        smooth: true
-                    }
-                }
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.alignment: Qt.AlignHCenter
 
-                // Circular border
-                Rectangle {
-                    anchors.fill: parent
-                    radius: width / 2
-                    color: "transparent"
-                    border.color: Kirigami.Theme.textColor
-                    border.width: 2
-                    opacity: 0.3
-                }
+                    // Circular container
+                    Item {
+                        id: globeContainer
+                        anchors.centerIn: parent
+                        width: Math.min(parent.width, parent.height) * 0.7
+                        height: width
 
-                // Clip to circle using layer
-                layer.enabled: true
-                layer.effect: OpacityMask {
-                    maskSource: Rectangle {
-                        width: globeContainer.width
-                        height: globeContainer.height
+                        // Container for tiled maps
+                        Item {
+                            id: mapContainer
+                            width: parent.width * 2.5 * 3  // 3 copies side by side
+                            height: parent.height * 2.5
+                            
+                            // Calculate base position for center tile
+                            property real baseX: {
+                                if (!root.currentStation || root.currentStation.geo_long === null) {
+                                    return -(width / 3 - parent.width) / 2; // Default to center (0,0)
+                                }
+                                var lon = root.currentStation.geo_long;
+                                var normalizedLon = (lon + 180) / 360;
+                                var mapX = normalizedLon * (width / 3);
+                                return parent.width / 2 - mapX - (width / 3);
+                            }
+                            
+                            property real baseY: {
+                                if (!root.currentStation || root.currentStation.geo_lat === null) {
+                                    return -(height - parent.height) / 2;
+                                }
+                                var lat = root.currentStation.geo_lat;
+                                var normalizedLat = (90 - lat) / 180;
+                                var mapY = normalizedLat * height;
+                                return parent.height / 2 - mapY;
+                            }
+                            
+                            x: baseX
+                            y: baseY
+                            
+                            Behavior on x {
+                                NumberAnimation {
+                                    duration: 1500
+                                    easing.type: Easing.InOutCubic
+                                }
+                            }
+                            
+                            Behavior on y {
+                                NumberAnimation {
+                                    duration: 1500
+                                    easing.type: Easing.InOutCubic
+                                }
+                            }
+                            
+                            // Left tile
+                            Image {
+                                x: 0
+                                width: parent.width / 3
+                                height: parent.height
+                                source: "../images/earth.jpg"
+                                fillMode: Image.Stretch
+                                smooth: true
+                            }
+                            
+                            // Center tile
+                            Image {
+                                x: parent.width / 3
+                                width: parent.width / 3
+                                height: parent.height
+                                source: "../images/earth.jpg"
+                                fillMode: Image.Stretch
+                                smooth: true
+                            }
+                            
+                            // Right tile
+                            Image {
+                                x: parent.width / 3 * 2
+                                width: parent.width / 3
+                                height: parent.height
+                                source: "../images/earth.jpg"
+                                fillMode: Image.Stretch
+                                smooth: true
+                            }
+                        }
+
+                        // Circular border
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: width / 2
+                            color: "transparent"
+                            border.color: Kirigami.Theme.textColor
+                            border.width: 2
+                            opacity: 0.3
+                        }
+
+                        // Clip to circle using layer
+                        layer.enabled: true
+                        layer.effect: OpacityMask {
+                            maskSource: Rectangle {
+                                width: globeContainer.width
+                                height: globeContainer.height
+                                radius: width / 2
+                            }
+                        }
+                    }
+
+                    // Station location marker (red dot in center)
+                    Rectangle {
+                        visible: root.currentStation && root.currentStation.geo_lat !== null && root.currentStation.geo_long !== null
+                        anchors.centerIn: globeContainer
+                        width: Kirigami.Units.gridUnit * 0.8
+                        height: width
                         radius: width / 2
+                        color: "#FF5252"
+                        border.color: "white"
+                        border.width: 2
+                        z: 10
+                        
+                        // Pulsing animation
+                        SequentialAnimation on scale {
+                            running: root.isPlaying && root.currentStation !== null
+                            loops: Animation.Infinite
+                            NumberAnimation { to: 1.3; duration: 800; easing.type: Easing.InOutQuad }
+                            NumberAnimation { to: 1.0; duration: 800; easing.type: Easing.InOutQuad }
+                        }
+                    }
+                }
+
+                // Bottom info
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Kirigami.Units.smallSpacing
+
+                    QQC2.Button {
+                        icon.name: "configure"
+                        flat: true
+                        onClicked: {
+                            print("PlasmaFM: Settings button clicked!");
+                            console.error("PlasmaFM: Settings button clicked!");
+                            
+                            var configAction = plasmoid.action("configure");
+                            var internalConfigAction = typeof plasmoid.internalAction === "function" ? plasmoid.internalAction("configure") : null;
+                            
+                            print("PlasmaFM: configAction exists: " + (configAction !== null));
+                            print("PlasmaFM: internalConfigAction exists: " + (internalConfigAction !== null));
+                            
+                            if (internalConfigAction) {
+                                print("PlasmaFM: Triggering internalAction configure");
+                                internalConfigAction.trigger();
+                            } else if (configAction) {
+                                print("PlasmaFM: Triggering action configure");
+                                configAction.trigger();
+                            } else {
+                                print("PlasmaFM: No actions found, using configurationRequired");
+                                plasmoid.configurationRequired = true;
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: Kirigami.Units.smallSpacing
+
+                        Kirigami.Icon {
+                            source: "flag"
+                            width: Kirigami.Units.iconSizes.small
+                            height: Kirigami.Units.iconSizes.small
+                        }
+
+                        PlasmaComponents.Label {
+                            text: root.currentStation ? root.shortenCountryName(root.currentStation.country) : ""
+                            font.pixelSize: Kirigami.Units.gridUnit * 0.9
+                            color: Kirigami.Theme.textColor
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    PlasmaComponents.ToolButton {
+                        icon.name: root.isFavorited() ? "starred-symbolic" : "non-starred-symbolic"
+                        enabled: root.currentStation !== null
+                        onClicked: root.toggleFavorite()
                     }
                 }
             }
-
-            // Station location marker (red dot in center)
-            Rectangle {
-                visible: root.currentStation && root.currentStation.geo_lat !== null && root.currentStation.geo_long !== null
-                anchors.centerIn: globeContainer
-                width: Kirigami.Units.gridUnit * 0.8
-                height: width
-                radius: width / 2
-                color: "#FF5252"
-                border.color: "white"
-                border.width: 2
-                z: 10
-                
-                // Pulsing animation
-                SequentialAnimation on scale {
-                    running: root.isPlaying && root.currentStation !== null
-                    loops: Animation.Infinite
-                    NumberAnimation { to: 1.3; duration: 800; easing.type: Easing.InOutQuad }
-                    NumberAnimation { to: 1.0; duration: 800; easing.type: Easing.InOutQuad }
-                }
-            }
-        }
-
-        // Bottom info
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Kirigami.Units.smallSpacing
-
-            PlasmaComponents.ToolButton {
-                icon.name: "configure"
-                onClicked: plasmoid.action("configure").trigger()
-            }
-
-            RowLayout {
-                spacing: Kirigami.Units.smallSpacing
-
-                Kirigami.Icon {
-                    source: "flag"
-                    width: Kirigami.Units.iconSizes.small
-                    height: Kirigami.Units.iconSizes.small
-                }
-
-                PlasmaComponents.Label {
-                    text: root.currentStation ? root.shortenCountryName(root.currentStation.country) : ""
-                    font.pixelSize: Kirigami.Units.gridUnit * 0.9
-                    color: Kirigami.Theme.textColor
-                }
-            }
-
-            Item { Layout.fillWidth: true }
-
-            PlasmaComponents.ToolButton {
-                icon.name: root.isFavorited() ? "starred-symbolic" : "non-starred-symbolic"
-                enabled: root.currentStation !== null
-                onClicked: root.toggleFavorite()
-            }
-        }
         }
     }
-}
 
 
     // Config change handlers
